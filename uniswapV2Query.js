@@ -35,7 +35,23 @@ const main = async () => {
         }
     })
 
+    const batchCalldata2 = uniSwapPairContracts.map(pair => {
+        return{
+            target: pair.address,
+            callData: pair.interface.encodeFunctionData('price0CumulativeLast')
+        }
+    })
+
+    const batchCalldata3 = uniSwapPairContracts.map(pair => {
+        return{
+            target: pair.address,
+            callData: pair.interface.encodeFunctionData('price1CumulativeLast')
+        }
+    })
+
     const outputE = await multicall2.callStatic.tryAggregate(false, batchCalldata)
+    const outputF = await multicall2.callStatic.tryAggregate(false, batchCalldata2)
+    const outputG = await multicall2.callStatic.tryAggregate(false, batchCalldata3)
 
     const output = outputE.map((o, i) => {
         if (o.success) {
@@ -43,11 +59,27 @@ const main = async () => {
             console.log(uniSwapPairs[i][1])
             console.log("Reserve 0:", parseInt(o.returnData.slice(2, 66), 16))
             console.log("Reserve 1:", parseInt(o.returnData.slice(67, 130), 16))
+            console.log("Price 0: ", parseInt(outputF[i].returnData))
+            console.log("Price 1: ", parseInt(outputG[i].returnData))
+
             console.log("Last block timestamp:", parseInt(o.returnData.slice(131, 194), 16))
             
         }    
     })
 
+    
+/*
+    const output1 = outputF.map((o, i) => {
+        if (o.success) {
+            console.log('\n')
+            
+            console.log(uniSwapPairs[i][1])
+            console.log(parseInt(o.returnData))
+            
+            
+        }    
+    })
+*/
     console.log("queries @ " + new Date().toLocaleString())
 }
 

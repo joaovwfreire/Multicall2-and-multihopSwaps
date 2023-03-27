@@ -23,7 +23,6 @@ const uniSwapPairs = [
     ["0xE0cc5aFc0FF2c76183416Fb8d1a29f6799FB2cdF", "WETH-XIO"]
 ]
 
-
 const main = async () => {
     const multicall2 = new ethers.Contract('0x9695FA23b27022c7DD752B7d64bB5900677ECC21', multicallAbi, provider)
     const uniSwapPairContracts = uniSwapPairs.map(pair => new ethers.Contract(pair[0], uniswapv2pairAbi, provider))
@@ -65,7 +64,6 @@ const main = async () => {
         }
     })
    
-
     const outputE = await multicall2.callStatic.tryAggregate(false, batchCalldata)
     const outputF = await multicall2.callStatic.tryAggregate(false, batchCalldata2)
     const outputG = await multicall2.callStatic.tryAggregate(false, batchCalldata3)
@@ -82,17 +80,19 @@ const main = async () => {
 
     const outputJ = await multicall2.callStatic.tryAggregate(false, batchCalldata6)
 
-    console.log(outputJ)
     const output = outputE.map((o, i) => {
+       
         if (o.success) {
             console.log('\n')
             console.log(uniSwapPairs[i][1])
             console.log("Reserve 0:", parseInt(o.returnData.slice(2, 66), 16))
-            console.log("Reserve 1:", parseInt(o.returnData.slice(67, 130), 16))
-            console.log("Price 0: ", parseInt(outputF[i].returnData))
+            console.warn("Reserve 1:", parseInt(o.returnData.slice(67, 130), 16))
+            console.error("Price 0: ", parseInt(outputF[i].returnData))
             console.log("Price 1: ", parseInt(outputG[i].returnData))
-            console.log("Token 0: ", outputH[i].returnData)
-            console.log("Token 1: ", outputI[i].returnData)
+            console.log("Token 0: ", (outputH[i].returnData).slice(0, 2) + (outputH[i].returnData).slice(-40))
+            console.log("Token 1: ", (outputI[i].returnData).slice(0, 2) + (outputI[i].returnData).slice(-40))
+            console.log("Amounts in: ", parseInt(outputJ[i].returnData.slice(-128, -64), 16))
+            console.log("Amounts out: ", parseInt(outputJ[i].returnData.slice(-64), 16))
             
             //console.log("Amounts out: ", parseInt(outputJ[i].returnData.slice(2, 66), 16))
             

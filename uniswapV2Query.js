@@ -2,7 +2,6 @@ const { ethers } = require('ethers')
 const multicallAbi = require('./abi/multicall2.json')
 const uniswapv2pairAbi = require('./abi/uniswapv2pair.json')
 const uniswapv2router02Abi = require('./abi/uniswapv2router02.json')
-const uniswapv2router02Abi = require('./abi/uniswapv2router02.json')
 const provider = new ethers.providers.InfuraProvider()
 
 const uniSwapPairs = [
@@ -29,8 +28,7 @@ const main = async () => {
     const multicall2 = new ethers.Contract('0x9695FA23b27022c7DD752B7d64bB5900677ECC21', multicallAbi, provider)
     const uniSwapPairContracts = uniSwapPairs.map(pair => new ethers.Contract(pair[0], uniswapv2pairAbi, provider))
     const uniSwapRouterV2 = new ethers.Contract('0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D', require('./abi/uniswapv2router02.json'), provider)
-    const uniSwapRouterV2 = new ethers.Contract('0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D', require('./abi/uniswapv2router02.json'), provider)
-
+    
     const batchCalldata = uniSwapPairContracts.map(pair => {
         return{
             target: pair.address,

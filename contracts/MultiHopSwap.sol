@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.19;
 
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
@@ -8,14 +9,18 @@ contract MultiHopSwap {
 
     address private constant UNISWAP_ROUTER_ADDRESS = 0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D;
 
-    IUniswapV2Router private const UNISWAP_ROUTER = IUniswapV2Router(UNISWAP_ROUTER_ADDRESS);
-    function MultiHopSwapExactAmountOut(address token, uint amountOut, uint amountInMax, uint[] memory path) external{
+    IUniswapV2Router02 private UNISWAP_ROUTER; 
+   
+   constructor() {
+        UNISWAP_ROUTER = IUniswapV2Router02(UNISWAP_ROUTER_ADDRESS);
+    }
+    function MultiHopExactAmountOut(address token, uint amountOut, uint amountInMax, address[] memory path) external returns (uint[] memory amounts){
         IERC20 tokenIn = IERC20(token);
 
         tokenIn.transferFrom(msg.sender, address(this), amountInMax);
         tokenIn.approve(UNISWAP_ROUTER_ADDRESS, amountInMax);
 
-        uint[] memory amounts = UNISWAP_ROUTER.swapTokensForExactTokens(
+        amounts = UNISWAP_ROUTER.swapTokensForExactTokens(
             amountOut, 
             amountInMax, 
             path, 
@@ -23,8 +28,24 @@ contract MultiHopSwap {
             block.timestamp
         );
 
-        if 
+        if (amounts[0] < amountInMax) {
+            tokenIn.transfer(msg.sender, amountInMax - amounts[0]);
+        }
 
+    }
 
+    function MultiHopExactAmountIn(address token, uint amountIn, uint amountOutMin, address[] memory path) external returns (uint[] memory amounts){
+        IERC20 tokenIn = IERC20(token);
+
+        tokenIn.transferFrom(msg.sender, address(this), amountIn);
+        tokenIn.approve(UNISWAP_ROUTER_ADDRESS, amountIn);
+
+        amounts = UNISWAP_ROUTER.swapExactTokensForTokens(
+            amountIn,
+            amountOutMin,
+            path,
+            msg.sender,
+            block.timestamp
+        );
     }
 }
